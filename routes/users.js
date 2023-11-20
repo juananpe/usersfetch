@@ -7,10 +7,16 @@ let users = [
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.render("users", {
-    title: "Users", 
-    users: users
-  });
+  db.bezeroak.find( function (err, docs) {
+        if (err) {
+            console.log(err)
+        } else {
+            res.render('index', {
+                'izenburua': 'EJS probatzen',
+                'bezeroak': docs
+            })
+        }
+    });
 });
 
 router.get('/list', function(req, res, next) {
@@ -19,21 +25,51 @@ router.get('/list', function(req, res, next) {
 
 
 router.post("/new", (req, res) => {
-  users.push(req.body);
-  res.json(users);
+  const bezeroBerria =  {
+    izena : req.body.izena,
+    abizena: req.body.abizena,
+    email: req.body.email
+  };
+
+  if (req.body._id) {
+      db.bezeroak.update(
+          {_id: mongojs.ObjectID(req.body._id)},
+          {
+              $set: bezeroBerria
+          }, function (err) {
+              if (err) {
+                  console.log(err);
+              }
+          })
+  }else{
+      db.bezeroak.insert( bezeroBerria );
+  }
+
+  res.redirect('/');
 });
 
-router.delete("/delete/:id", (req, res) => {
-  users = users.filter(user => user.id != req.params.id);
-  res.json(users);
+router.post("/ezabatu/:id", (req, res) => {
+  db.bezeroak.remove(
+    {_id:  mongojs.ObjectID(req.body._id)}, function () {
+        console.log("zuzen ezabatu da");
+    }
+  );
+  res.redirect('/');
 });
 
-router.put("/update/:id", (req, res) => {
-  let user = users.find(user => user.id == req.params.id);
-  user.izena = req.body.izena;
-  user.abizena = req.body.abizena;
-  user.email = req.body.email;
-  res.json(users);
+router.get("/editatu/:id", (req, res) => {
+  db.bezeroak.find(
+    {"_id":  mongojs.ObjectID(req.params.id)},
+    function (err, doc) {
+    if (err) {
+        console.log(err)
+    } else {
+        res.render('editatu', {
+            'izenburua': 'Bezeroa editatu',
+            'bezeroa': doc[0]
+        })
+    }
+  })
 })
 
 module.exports = router;
