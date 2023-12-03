@@ -19,8 +19,8 @@ db.bezeroak.find( function (err, userdocs) {
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.render("users", {
-    title: "Erabiltzaileak",
-    users: users,
+    title: "Erabiltzaileak"
+    // users: users,
   });
 })
 
