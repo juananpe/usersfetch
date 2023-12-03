@@ -1,9 +1,20 @@
 var express = require('express');
 var router = express.Router();
 
-let users = [
-  {id: Date.now(), izena: "John", abizena: "Doe", email: "john@doe.com"},
-];
+// let users = [
+//   {id: Date.now(), izena: "John", abizena: "Doe", email: "john@doe.com"},
+// ];
+
+const mongojs = require('mongojs')
+const db = mongojs('bezeroakdb', ['bezeroak'])
+
+db.bezeroak.find( function (err, userdocs) {
+  if (err) {
+      console.log(err)
+  } else {
+      console.log(userdocs)
+  }
+})
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -25,51 +36,51 @@ router.get('/list', function(req, res, next) {
 
 
 router.post("/new", (req, res) => {
-  const bezeroBerria =  {
-    izena : req.body.izena,
-    abizena: req.body.abizena,
-    email: req.body.email
-  };
+  users.push(req.body);
 
-  if (req.body._id) {
-      db.bezeroak.update(
-          {_id: mongojs.ObjectID(req.body._id)},
-          {
-              $set: bezeroBerria
-          }, function (err) {
-              if (err) {
-                  console.log(err);
-              }
-          })
-  }else{
-      db.bezeroak.insert( bezeroBerria );
-  }
-
-  res.redirect('/');
-});
-
-router.post("/ezabatu/:id", (req, res) => {
-  db.bezeroak.remove(
-    {_id:  mongojs.ObjectID(req.body._id)}, function () {
-        console.log("zuzen ezabatu da");
-    }
-  );
-  res.redirect('/');
-});
-
-router.get("/editatu/:id", (req, res) => {
-  db.bezeroak.find(
-    {"_id":  mongojs.ObjectID(req.params.id)},
-    function (err, doc) {
+  db.bezeroak.insert(req.body, function (err, user) {
     if (err) {
         console.log(err)
     } else {
-        res.render('editatu', {
-            'izenburua': 'Bezeroa editatu',
-            'bezeroa': doc[0]
-        })
+        console.log(user)
+        res.json(user)
     }
-  })
+  });
+  // res.redirect('/');
+});
+
+router.delete("/ezabatu/:id", (req, res) => {
+  users = users.filter((user) => user.id != req.params.id);
+  db.bezeroak.remove(
+    {_id:  mongojs.ObjectID(req.params.id)}, function (err, user) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(user)            
+        } 
+    }
+  );
+  // res.redirect('/');
+});
+
+router.get("/editatu/:id", (req, res) => {
+  let user = users.find((user) => user.id == req.params.id);
+  user.user = req.body.izena;
+  user.abizena = req.body.abizena;
+  user.email = req.body.email;
+
+  db.bezeroak.update(
+    {_id:  mongojs.ObjectID(req.params.id)}, 
+    {$set: {izena: req.body.izena, abizena: req.body.abizena, email: req.body.email}}, 
+    function (err, user) {
+      if (err) {
+          console.log(err)
+      } else {
+          console.log(user)            
+      } 
+    }
+  );
+  res.json(user);
 })
 
 module.exports = router;
