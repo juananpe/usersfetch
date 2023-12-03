@@ -18,17 +18,12 @@ db.bezeroak.find( function (err, userdocs) {
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  db.bezeroak.find( function (err, docs) {
-        if (err) {
-            console.log(err)
-        } else {
-            res.render('index', {
-                'izenburua': 'EJS probatzen',
-                'bezeroak': docs
-            })
-        }
-    });
-});
+  res.render("users", {
+    title: "Erabiltzaileak",
+    users: users,
+  });
+})
+
 
 router.get('/list', function(req, res, next) {
   res.json(users)
