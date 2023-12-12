@@ -8,26 +8,29 @@ var router = express.Router();
 const mongojs = require('mongojs')
 const db = mongojs('bezeroakdb', ['bezeroak'])
 
+let users = []
+
 db.bezeroak.find( function (err, userdocs) {
   if (err) {
       console.log(err)
   } else {
-      console.log(userdocs)
+      users = userdocs
   }
 })
 
+
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
   res.render("users", {
-    title: "Erabiltzaileak"
-    // users: users,
+    title: "Erabiltzaileak",
+    users: users,
   });
 })
 
 
-router.get('/list', function(req, res, next) {
+router.get('/list', function (req, res, next) {
   res.json(users)
-  });
+});
 
 
 router.post("/new", (req, res) => {
@@ -35,27 +38,27 @@ router.post("/new", (req, res) => {
 
   db.bezeroak.insert(req.body, function (err, user) {
     if (err) {
-        console.log(err)
+      console.log(err)
     } else {
-        console.log(user)
-        res.json(user)
+      console.log(user)
+      res.json(user)
     }
   });
   // res.redirect('/');
 });
 
-router.delete("/ezabatu/:id", (req, res) => {
+router.delete("/delete/:id", (req, res) => {
   users = users.filter((user) => user.id != req.params.id);
   db.bezeroak.remove(
-    {_id:  mongojs.ObjectID(req.params.id)}, function (err, user) {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log(user)            
-        } 
+    { _id: mongojs.ObjectID(req.params.id) }, function (err, user) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log(user)
+      }
     }
   );
-  // res.redirect('/');
+  res.json(users);
 });
 
 router.get("/editatu/:id", (req, res) => {
@@ -65,14 +68,14 @@ router.get("/editatu/:id", (req, res) => {
   user.email = req.body.email;
 
   db.bezeroak.update(
-    {_id:  mongojs.ObjectID(req.params.id)}, 
-    {$set: {izena: req.body.izena, abizena: req.body.abizena, email: req.body.email}}, 
+    { _id: mongojs.ObjectID(req.params.id) },
+    { $set: { izena: req.body.izena, abizena: req.body.abizena, email: req.body.email } },
     function (err, user) {
       if (err) {
-          console.log(err)
+        console.log(err)
       } else {
-          console.log(user)            
-      } 
+        console.log(user)
+      }
     }
   );
   res.json(user);
