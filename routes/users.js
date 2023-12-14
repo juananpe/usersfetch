@@ -50,7 +50,7 @@ router.post("/new", (req, res) => {
 router.delete("/delete/:id", (req, res) => {
   users = users.filter((user) => user.id != req.params.id);
   db.bezeroak.remove(
-    { _id: mongojs.ObjectID(req.params.id) }, function (err, user) {
+    { id: parseInt(req.params.id) }, function (err, user) {
       if (err) {
         console.log(err)
       } else {
@@ -61,14 +61,14 @@ router.delete("/delete/:id", (req, res) => {
   res.json(users);
 });
 
-router.get("/editatu/:id", (req, res) => {
-  let user = users.find((user) => user.id == req.params.id);
-  user.user = req.body.izena;
+router.put("/update/:id", (req, res) => {
+  let user = users.find(user => user.id == req.params.id);
+  user.izena = req.body.izena;
   user.abizena = req.body.abizena;
   user.email = req.body.email;
 
   db.bezeroak.update(
-    { _id: mongojs.ObjectID(req.params.id) },
+    { id: parseInt(req.params.id) },
     { $set: { izena: req.body.izena, abizena: req.body.abizena, email: req.body.email } },
     function (err, user) {
       if (err) {
